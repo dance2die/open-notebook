@@ -1,0 +1,23 @@
+name: Sync Upstream
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: 0 * * * * # Runs every hour. Adjust as needed.
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+      - name: Sync with upstream
+        run: |
+          git remote add upstream https://github.com/lfnovo/open-notebook.git
+          git fetch upstream
+          git merge upstream/main
+          git push origin main
