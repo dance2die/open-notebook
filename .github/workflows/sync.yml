@@ -15,9 +15,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: main
+          fetch-depth: 0
       - name: Sync with upstream
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/lfnovo/open-notebook.git
           git fetch upstream
-          git merge upstream/main
+          git merge upstream/main --allow-unrelated-histories -m "Merge upstream main"
           git push origin main
