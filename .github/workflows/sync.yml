@@ -22,5 +22,24 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/lfnovo/open-notebook.git
           git fetch upstream
-          git merge upstream/main --allow-unrelated-histories -m "Merge upstream main"
+          if ! git merge upstream/main --allow-unrelated-histories -m "Merge upstream main"; then
+            echo "Merge failed, checking for modify/delete conflicts..."
+            conflicted_files=$(git diff --name-only --diff-filter=U)
+            for file in $conflicted_files; do
+              if ! git cat-file -e "HEAD:$file" 2>/dev/null; then
+                echo "File $file does not exist in HEAD. Keeping it deleted."
+                git rm "$file"
+              fi
+            done
+            remaining_conflicts=$(git diff --name-only --diff-filter=U)
+            if [ -z "$remaining_conflicts" ]; then
+              echo "All conflicts resolved automatically. Committing..."
+              git commit --no-edit
+            else
+              echo "There are still unresolved conflicts:"
+              echo "$remaining_conflicts"
+              exit 1
+            fi
+          fi
           git push origin main
+
